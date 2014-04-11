@@ -104,6 +104,7 @@ public class HDFSClient {
 
 		ugi.doAs(new PrivilegedExceptionAction<Void>() {
 
+			@Override
 			public Void run() throws Exception {
 
 				Configuration conf = new Configuration();
@@ -202,6 +203,7 @@ public class HDFSClient {
 					}
 					
 					if (command.equals("exit")) {
+						scanner.close();
 						System.exit(0);
 					}
 
