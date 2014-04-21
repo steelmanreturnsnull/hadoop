@@ -12,12 +12,13 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.security.UserGroupInformation;
 
 public class HDFSClient {
 
-	private static FileSystem	fileSystem	= null;
-	private static final String user = "pinjhuan";
+	private static FileSystem		fileSystem	= null;
+	private static final String	user				= "pinjhuan";
 
 	private static void ls(String path) throws FileNotFoundException, IllegalArgumentException, IOException {
 		FileStatus[] fs = fileSystem.listStatus(new Path(path));
@@ -49,19 +50,24 @@ public class HDFSClient {
 		System.out.println("Successfully changed path " + path + " owner to " + username + " group to " + groupname + ".");
 	}
 
+	private static void chmod(String path, String mode) throws FileNotFoundException, IllegalArgumentException, IOException {
+		fileSystem.setPermission(new Path(path), new FsPermission(mode));
+		System.out.println("Successfully changed path " + path + "permission to " + mode + ".");
+	}
+
 	private static void rm(String path) throws IllegalArgumentException, IOException {
 		fileSystem.delete(new Path(path), true); // recursively
 		System.out.println("Successfully deleted path " + path + ".");
 	}
-	
+
 	private static void copyFromLocal(String fromPath, String toPath) throws IllegalArgumentException, IOException {
 		fileSystem.copyFromLocalFile(new Path(fromPath), new Path(toPath));
-		System.out.println("Successfully copied path " + fromPath + " to "+ toPath + ".");
+		System.out.println("Successfully copied path " + fromPath + " to " + toPath + ".");
 	}
-	
+
 	private static void copyToLocal(String fromPath, String toPath) throws IllegalArgumentException, IOException {
-		fileSystem.copyToLocalFile(false, new Path(fromPath), new Path(toPath), true); //useRawLocalFileSystem = true, delSrc = false
-		System.out.println("Successfully copied path " + fromPath + " to "+ toPath + ".");
+		fileSystem.copyToLocalFile(false, new Path(fromPath), new Path(toPath), true); // useRawLocalFileSystem = true, delSrc = false
+		System.out.println("Successfully copied path " + fromPath + " to " + toPath + ".");
 	}
 
 	private static void printUsage(String command) {
@@ -79,12 +85,15 @@ public class HDFSClient {
 
 		if (command.equals("rm"))
 			System.out.println("Usage: rm <dir>");
-		
+
 		if (command.equals("copyFromLocal"))
 			System.out.println("Usage: copyFromLocal <fromDir> <toDir>");
-		
+
 		if (command.equals("copyToLocal"))
 			System.out.println("Usage: copyToLocal <fromDir> <toDir>");
+		
+		if (command.equals("chmod"))
+			System.out.println("Usage: chmod <dir> <mode>");
 
 		if (command.equals("help")) {
 			System.out.println("Usage: ls <dir>");
@@ -94,6 +103,7 @@ public class HDFSClient {
 			System.out.println("Usage: rm <dir>");
 			System.out.println("Usage: copyFromLocal <fromDir> <toDir>");
 			System.out.println("Usage: copyToLocal <fromDir> <toDir>");
+			System.out.println("Usage: chmod <dir> <mode>");
 			System.out.println("Usage: exit");
 		}
 	}
@@ -177,7 +187,7 @@ public class HDFSClient {
 						}
 						continue;
 					}
-					
+
 					if (command.equals("copyFromLocal")) {
 						try {
 							String fromDir = scanner.next();
@@ -189,7 +199,7 @@ public class HDFSClient {
 						}
 						continue;
 					}
-					
+
 					if (command.equals("copyToLocal")) {
 						try {
 							String fromDir = scanner.next();
@@ -202,6 +212,18 @@ public class HDFSClient {
 						continue;
 					}
 					
+					if (command.equals("chmod")) {
+						try {
+							String dir = scanner.next();
+							String mode = scanner.next();
+							chmod(dir, mode);
+						} catch (Exception e) {
+							e.printStackTrace();
+							printUsage(command);
+						}
+						continue;
+					}
+
 					if (command.equals("exit")) {
 						scanner.close();
 						System.exit(0);

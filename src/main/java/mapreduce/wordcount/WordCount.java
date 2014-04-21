@@ -45,11 +45,17 @@ public class WordCount {
 	}
 
 	public static void main(String[] args) throws Exception {
-		Configuration conf = new Configuration();
-		if (args.length != 3) {
+		
+		if (args.length != 2) {
 			System.err.println("Usage: wordcount <in> <out>");
 			System.exit(2);
 		}
+		
+		Configuration conf = new Configuration();
+		
+		conf.addResource(new Path("src/conf/core-site.xml"));
+		conf.addResource(new Path("src/conf/mapred-site.xml"));
+		conf.reloadConfiguration();
 
 		@SuppressWarnings("deprecation")
 		Job job = new Job(conf, "word count");
@@ -61,8 +67,8 @@ public class WordCount {
 
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(IntWritable.class);
-		FileInputFormat.addInputPath(job, new Path(args[1]));
-		FileOutputFormat.setOutputPath(job, new Path(args[2]));
+		FileInputFormat.addInputPath(job, new Path(args[0]));
+		FileOutputFormat.setOutputPath(job, new Path(args[1]));
 
 		System.exit(job.waitForCompletion(true) ? 0 : 1);
 	}
